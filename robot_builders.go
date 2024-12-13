@@ -8,6 +8,7 @@ import (
 	"github.com/JoshPattman/jcode"
 )
 
+// Keeps track of all possible robot builders
 type RobotIndex map[string]RobotBuilder
 
 var DefaultRobotIndex = RobotIndex{
