@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/JoshPattman/jcode"
@@ -8,13 +9,14 @@ import (
 )
 
 type TargetStateMachine struct {
-	Last         jcode.Waypoint
-	Next         jcode.Waypoint
-	LastTime     time.Time
-	NextDuration time.Duration
-	Speed        jcode.Speed
-	CurrentTime  time.Time
-	PenMode      jcode.PenMode
+	Last                 jcode.Waypoint
+	Next                 jcode.Waypoint
+	LastTime             time.Time
+	NextDuration         time.Duration
+	Speed                jcode.Speed
+	CurrentTime          time.Time
+	PenMode              jcode.PenMode
+	HasActiveInstruction bool
 }
 
 func (sm *TargetStateMachine) Reset(to jcode.Waypoint) {
@@ -25,38 +27,51 @@ func (sm *TargetStateMachine) Reset(to jcode.Waypoint) {
 	sm.Last = to
 	sm.Next = to
 	sm.PenMode = jcode.PenUp
+	sm.HasActiveInstruction = false
 }
 
-func (sm *TargetStateMachine) Update(instructions chan jcode.Instruction) bool {
+func (sm *TargetStateMachine) Update(instructions chan jcode.Instruction, outEncoder *jcode.Encoder) bool {
 	sm.CurrentTime = time.Now()
 	needNextInstruction := false
+	doneIns := func() {
+		sm.HasActiveInstruction = false
+		outEncoder.Write(jcode.Consumed{})
+	}
 	if sm.CurrentTime.Sub(sm.LastTime) >= sm.NextDuration || sm.NextDuration == 0 {
+		if sm.HasActiveInstruction {
+			doneIns()
+		}
 		needNextInstruction = true
 		sm.Last = sm.Next
 		sm.LastTime = sm.CurrentTime
 		sm.NextDuration = 0
+
 	}
 	for needNextInstruction && len(instructions) > 0 {
 		ins, ok := <-instructions
 		if !ok {
 			return false
 		}
+		sm.HasActiveInstruction = true
 		switch ins := ins.(type) {
 		case jcode.Waypoint:
 			if !jcode.Possible(sm.Last, ins, sm.Speed) {
-				panic("Cannot move to a non zero waypoint if speed is 0")
+				outEncoder.Write(jcode.Log{Message: "Error: Cannot move to a non zero waypoint if speed is 0"})
+				os.Exit(1)
 			}
 			sm.Next = ins
 			sm.NextDuration = jcode.Time(sm.Last, sm.Next, sm.Speed)
 			needNextInstruction = false
-		case jcode.Speed:
-			sm.Speed = ins
 		case jcode.Delay:
 			sm.Next = sm.Last
 			sm.NextDuration = ins.Duration
 			needNextInstruction = false
+		case jcode.Speed:
+			sm.Speed = ins
+			doneIns()
 		case jcode.Pen:
 			sm.PenMode = ins.Mode
+			doneIns()
 		}
 	}
 	return true

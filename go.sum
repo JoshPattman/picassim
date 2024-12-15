@@ -1,5 +1,5 @@
-github.com/JoshPattman/jcode v0.0.0-20241213210534-4d96f7af71fd h1:tK9VU7Fx74O/++8DZK6tlnNMRplQ6+Jc6KTa1vEvvJI=
-github.com/JoshPattman/jcode v0.0.0-20241213210534-4d96f7af71fd/go.mod h1:atEK9lV3sdMuvUgopKLVZ4E9+RgTh3hnB+/rV0EQS9s=
+github.com/JoshPattman/jcode v0.0.1 h1:/4ao9V5aNzQ+P6TrDW3RKz3ApcM5K8E3w6DQnBbUwpA=
+github.com/JoshPattman/jcode v0.0.1/go.mod h1:atEK9lV3sdMuvUgopKLVZ4E9+RgTh3hnB+/rV0EQS9s=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/faiface/glhf v0.0.0-20211013000516-57b20770c369 h1:gv4BgP50atccdK/1tZHDyP6rMwiiutR2HPreR/OyLzI=

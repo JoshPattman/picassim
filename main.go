@@ -54,6 +54,7 @@ func run() {
 
 	// Start reading instructions from stdin
 	instructions := jcode.BeginInstructionProcessing(os.Stdin, 10)
+	instructionTelem := jcode.NewEncoder(os.Stdout)
 
 	// Init window
 	cfg := pixelgl.WindowConfig{
@@ -90,7 +91,7 @@ func run() {
 		win.Clear(colornames.Black)
 
 		// Update target state
-		if !tsm.Update(instructions) {
+		if !tsm.Update(instructions, instructionTelem) {
 			return
 		}
 		tspWpPos := tsm.TargetPosition()
