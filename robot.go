@@ -21,15 +21,15 @@ type RobotIndex map[string]RobotBuilder
 
 var DefaultRobotIndex = RobotIndex{
 	"picasso": &TwoArmRobotConfig{
-		LimbInnerLength:        8,
-		LimbOuterLength:        10,
+		LimbInnerLength:        7,
+		LimbOuterLength:        8,
 		Spread:                 2,
 		MaxAcceleration:        0.5 * 2 * math.Pi,
 		MaxSpeed:               2 * math.Pi,
 		AccelerationMultiplier: 20,
 		HomingFactor:           2,
-		MinMotorAngle:          -math.Pi / 2,
-		MaxMotorAngle:          0,
+		MinMotorAngle:          0,
+		MaxMotorAngle:          math.Pi / 2,
 	},
 	"basic-body2d": &LinearRobotConfig{
 		MaxAcceleration:        20,
