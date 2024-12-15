@@ -101,12 +101,13 @@ func run() {
 		rbtPixelPos := rbt.EEPos()
 
 		// Deal with drawing paths
-		if tsm.PenMode == jcode.PenDown {
+		justPenUp := (tsm.PenMode == jcode.PenUp && lastPenMode == jcode.PenDown)
+		if tsm.PenMode == jcode.PenDown || justPenUp {
 			if lastPenMode == jcode.PenUp {
 				// Need to create a new path
 				drawPaths = append(drawPaths, []pixel.Vec{})
 			}
-			if frameCounter%60 == 0 {
+			if frameCounter%60 == 0 || justPenUp {
 				drawPaths[len(drawPaths)-1] = append(drawPaths[len(drawPaths)-1], rbtPixelPos)
 			}
 			frameCounter++
