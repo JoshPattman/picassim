@@ -13,7 +13,8 @@ type RobotIndex map[string]RobotBuilder
 
 var DefaultRobotIndex = RobotIndex{
 	"picasso": &RobotConfigPicasso{
-		LimbLength:             8,
+		LimbInnerLength:        8,
+		LimbOuterLength:        10,
 		Spread:                 2,
 		MaxAcceleration:        0.5 * 2 * math.Pi,
 		MaxSpeed:               2 * math.Pi,
@@ -99,7 +100,8 @@ func (r *RobotConfigAccel) BuildRobot(start jcode.Waypoint) Robot {
 }
 
 type RobotConfigPicasso struct {
-	LimbLength             float64 `json:"limb_length"`
+	LimbInnerLength        float64 `json:"limb_inner_length"`
+	LimbOuterLength        float64 `json:"limb_outer_length"`
 	Spread                 float64 `json:"spread"`
 	MaxAcceleration        float64 `json:"max_acceleration"`
 	HomingFactor           float64 `json:"homing_factor"`
@@ -108,5 +110,5 @@ type RobotConfigPicasso struct {
 }
 
 func (r *RobotConfigPicasso) BuildRobot(start jcode.Waypoint) Robot {
-	return NewPicassoRobot(r.LimbLength, r.Spread, r.AccelerationMultiplier, r.HomingFactor, r.MaxAcceleration, r.MaxSpeed)
+	return NewPicassoRobot(r.LimbInnerLength, r.LimbOuterLength, r.Spread, r.AccelerationMultiplier, r.HomingFactor, r.MaxAcceleration, r.MaxSpeed)
 }

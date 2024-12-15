@@ -73,20 +73,21 @@ func (a *AccelerationRobot) EEPos() pixel.Vec {
 var _ Robot = &PicassoRobot{}
 
 type PicassoRobot struct {
-	leftAngle, rightAngle  float64
-	leftSpeed, rightSpeed  float64
-	maxAcceleration        float64
-	maxSpeed               float64
-	limbLength             float64
-	spread                 float64
-	lastUpdate             time.Time
-	accelerationMultiplier float64
-	homingFactor           float64
+	leftAngle, rightAngle            float64
+	leftSpeed, rightSpeed            float64
+	maxAcceleration                  float64
+	maxSpeed                         float64
+	limbInnerLength, limbOuterLength float64
+	spread                           float64
+	lastUpdate                       time.Time
+	accelerationMultiplier           float64
+	homingFactor                     float64
 }
 
-func NewPicassoRobot(limbLength, spread, accelerationMult, homingFactor, maxAccel, maxSpeed float64) *PicassoRobot {
+func NewPicassoRobot(limbInnerLength, limbOuterLength, spread, accelerationMult, homingFactor, maxAccel, maxSpeed float64) *PicassoRobot {
 	return &PicassoRobot{
-		limbLength:             limbLength,
+		limbOuterLength:        limbOuterLength,
+		limbInnerLength:        limbInnerLength,
 		spread:                 spread,
 		leftAngle:              math.Pi / 4,
 		rightAngle:             -math.Pi / 4,
@@ -100,11 +101,11 @@ func NewPicassoRobot(limbLength, spread, accelerationMult, homingFactor, maxAcce
 
 func (p *PicassoRobot) joints() (pixel.Vec, pixel.Vec, pixel.Vec, pixel.Vec, pixel.Vec) {
 	sv := pixel.V(p.spread/2, 0)
-	left := pixel.V(0, 1).Rotated(p.leftAngle).Scaled(p.limbLength).Sub(sv)
-	right := pixel.V(0, 1).Rotated(p.rightAngle).Scaled(p.limbLength).Add(sv)
+	left := pixel.V(0, 1).Rotated(p.leftAngle).Scaled(p.limbInnerLength).Sub(sv)
+	right := pixel.V(0, 1).Rotated(p.rightAngle).Scaled(p.limbInnerLength).Add(sv)
 	mp := left.Add(right).Scaled(0.5)
 	dtmp := left.Sub(mp).Len()
-	hamp := math.Sqrt(p.limbLength*p.limbLength - dtmp*dtmp)
+	hamp := math.Sqrt(p.limbOuterLength*p.limbOuterLength - dtmp*dtmp)
 	ep := mp.Add(left.Sub(right).Rotated(math.Pi / -2).Unit().Scaled(hamp))
 
 	return sv.Scaled(-1), sv, left, right, ep
@@ -143,8 +144,8 @@ func (p *PicassoRobot) ik(to pixel.Vec) (float64, float64) {
 	lRoot, rRoot, _, _, _ := p.joints()
 	lDist := lRoot.Sub(to).Len()
 	rDist := rRoot.Sub(to).Len()
-	lTotalAngle := cosineAngle(p.limbLength, lDist, p.limbLength)
-	bTotalAngle := -cosineAngle(p.limbLength, rDist, p.limbLength)
+	lTotalAngle := cosineAngle(p.limbOuterLength, lDist, p.limbInnerLength)
+	bTotalAngle := -cosineAngle(p.limbOuterLength, rDist, p.limbInnerLength)
 	leftAngle := lTotalAngle - (math.Pi/2 - lRoot.To(to).Angle())
 	rightAngle := bTotalAngle - (math.Pi/2 - rRoot.To(to).Angle())
 	return leftAngle, rightAngle
