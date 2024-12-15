@@ -28,6 +28,8 @@ var DefaultRobotIndex = RobotIndex{
 		MaxSpeed:               2 * math.Pi,
 		AccelerationMultiplier: 20,
 		HomingFactor:           2,
+		MinMotorAngle:          -math.Pi / 2,
+		MaxMotorAngle:          0,
 	},
 	"basic-body2d": &LinearRobotConfig{
 		MaxAcceleration:        20,

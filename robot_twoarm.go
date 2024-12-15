@@ -18,6 +18,8 @@ type TwoArmRobotConfig struct {
 	HomingFactor           float64 `json:"homing_factor"`
 	AccelerationMultiplier float64 `json:"acceleration_multiplier"`
 	MaxSpeed               float64 `json:"max_speed"`
+	MinMotorAngle          float64 `json:"min_motor_angle"`
+	MaxMotorAngle          float64 `json:"max_motor_angle"`
 }
 
 func (r *TwoArmRobotConfig) BuildRobot(start jcode.Waypoint) Robot {
@@ -32,6 +34,8 @@ func (r *TwoArmRobotConfig) BuildRobot(start jcode.Waypoint) Robot {
 		homingFactor:           r.HomingFactor,
 		maxAcceleration:        r.MaxAcceleration,
 		maxSpeed:               r.MaxAcceleration,
+		minMotorAngle:          r.MinMotorAngle,
+		maxMotorAngle:          r.MaxMotorAngle,
 	}
 }
 
@@ -47,6 +51,7 @@ type TwoArmRobot struct {
 	lastUpdate                       time.Time
 	accelerationMultiplier           float64
 	homingFactor                     float64
+	minMotorAngle, maxMotorAngle     float64
 }
 
 // Draw implements Robot.
@@ -60,6 +65,17 @@ func (p *TwoArmRobot) Draw(with *imdraw.IMDraw) {
 	with.Push(ep, jointL)
 	with.Line(0.1)
 	with.Push(ep, jointR)
+	with.Line(0.1)
+
+	with.Color = colornames.Red
+	with.Push(rootL, rootL.Add(pixel.V(0, 1).Rotated(p.maxMotorAngle)))
+	with.Line(0.1)
+	with.Push(rootL, rootL.Add(pixel.V(0, 1).Rotated(p.minMotorAngle)))
+	with.Line(0.1)
+
+	with.Push(rootR, rootR.Add(pixel.V(0, 1).Rotated(-p.maxMotorAngle)))
+	with.Line(0.1)
+	with.Push(rootR, rootR.Add(pixel.V(0, 1).Rotated(-p.minMotorAngle)))
 	with.Line(0.1)
 }
 
@@ -97,6 +113,9 @@ func (p *TwoArmRobot) Update(target pixel.Vec, targetVel pixel.Vec) {
 
 	p.leftAngle += p.leftSpeed * dt
 	p.rightAngle += p.rightSpeed * dt
+
+	p.leftAngle = clamp(p.leftAngle, p.minMotorAngle, p.maxMotorAngle)
+	p.rightAngle = clamp(p.rightAngle, -p.maxMotorAngle, -p.minMotorAngle)
 
 	p.lastUpdate = now
 }
