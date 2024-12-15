@@ -1,7 +1,7 @@
 # `picassim` - A Drawing Robot Simulator
 ![sim](readme_assets/sim.jpg)
 
-- Picassim is a simulator designed to be a drop in replacement for a painting/drawing robot that runs [jcode](github.com/JoshPattman/jcode).
+- Picassim is a simulator designed to be a drop in replacement for a painting/drawing robot that runs [jcode](https://github.com/JoshPattman/jcode).
 - It allows simulation of various types of robot, each with physics-based kinematics (to try to make the simulator as accurate to a real robot as possible).
 
 ## Installation
