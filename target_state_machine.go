@@ -66,6 +66,11 @@ func (sm *TargetStateMachine) Update(instructions chan jcode.Instruction, outEnc
 			sm.Next = sm.Last
 			sm.NextDuration = ins.Duration
 			needNextInstruction = false
+		case jcode.AutoHome:
+			// Its a bit bad we modify the speed here but oh well
+			sm.Speed = jcode.Speed{Speed: 1}
+			sm.Next = jcode.Waypoint{XPos: 0, YPos: 10}
+			sm.NextDuration = jcode.Time(sm.Last, sm.Next, sm.Speed)
 		case jcode.Speed:
 			sm.Speed = ins
 			doneIns()

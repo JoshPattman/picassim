@@ -102,6 +102,10 @@ func run() {
 		rbtPixelPos := rbt.EEPos()
 
 		// Deal with drawing paths
+		if win.JustPressed(pixelgl.KeyR) {
+			drawPaths = make([][]pixel.Vec, 0)
+			lastPenMode = jcode.PenUp
+		}
 		justPenUp := (tsm.PenMode == jcode.PenUp && lastPenMode == jcode.PenDown)
 		if tsm.PenMode == jcode.PenDown || justPenUp {
 			if lastPenMode == jcode.PenUp {
