@@ -1,7 +1,7 @@
 package main
 
 import (
-	"os"
+	"errors"
 	"time"
 
 	"github.com/JoshPattman/jcode"
@@ -30,16 +30,24 @@ func (sm *TargetStateMachine) Reset(to jcode.Waypoint) {
 	sm.HasActiveInstruction = false
 }
 
-func (sm *TargetStateMachine) Update(instructions chan jcode.Instruction, outEncoder *jcode.Encoder) bool {
+func (sm *TargetStateMachine) Update(comms *jcode.RobotCommunicator) error {
 	sm.CurrentTime = time.Now()
 	needNextInstruction := false
-	doneIns := func() {
+	doneIns := func() error {
 		sm.HasActiveInstruction = false
-		outEncoder.Write(jcode.Consumed{})
+		select {
+		case comms.ToController() <- jcode.Consumed{}:
+			return nil
+		case err := <-comms.Error():
+			return err
+		}
 	}
 	if sm.CurrentTime.Sub(sm.LastTime) >= sm.NextDuration || sm.NextDuration == 0 {
 		if sm.HasActiveInstruction {
-			doneIns()
+			err := doneIns()
+			if err != nil {
+				return err
+			}
 		}
 		needNextInstruction = true
 		sm.Last = sm.Next
@@ -47,17 +55,23 @@ func (sm *TargetStateMachine) Update(instructions chan jcode.Instruction, outEnc
 		sm.NextDuration = 0
 
 	}
-	for needNextInstruction && len(instructions) > 0 {
-		ins, ok := <-instructions
-		if !ok {
-			return false
+	for needNextInstruction && len(comms.FromController()) > 0 {
+		var ins jcode.Instruction
+		select {
+		case ins = <-comms.FromController():
+		case err := <-comms.Error():
+			return err
 		}
 		sm.HasActiveInstruction = true
 		switch ins := ins.(type) {
 		case jcode.Waypoint:
 			if !jcode.Possible(sm.Last, ins, sm.Speed) {
-				outEncoder.Write(jcode.Log{Message: "Error: Cannot move to a non zero waypoint if speed is 0"})
-				os.Exit(1)
+				select {
+				case comms.ToController() <- jcode.Log{Message: "Error: Cannot move to a non zero waypoint if speed is 0"}:
+					return errors.New("cannot move to a non zero waypoint if speed is 0")
+				case err := <-comms.Error():
+					return err
+				}
 			}
 			sm.Next = ins
 			sm.NextDuration = jcode.Time(sm.Last, sm.Next, sm.Speed)
@@ -73,13 +87,19 @@ func (sm *TargetStateMachine) Update(instructions chan jcode.Instruction, outEnc
 			sm.NextDuration = jcode.Time(sm.Last, sm.Next, sm.Speed)
 		case jcode.Speed:
 			sm.Speed = ins
-			doneIns()
+			err := doneIns()
+			if err != nil {
+				return err
+			}
 		case jcode.Pen:
 			sm.PenMode = ins.Mode
-			doneIns()
+			err := doneIns()
+			if err != nil {
+				return err
+			}
 		}
 	}
-	return true
+	return nil
 }
 
 func (sm *TargetStateMachine) TargetPosition() jcode.Waypoint {

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/JoshPattman/jcode"
@@ -52,9 +53,8 @@ func run() {
 		}
 	}
 
-	// Start reading instructions from stdin
-	instructions := jcode.BeginInstructionProcessing(os.Stdin, 10)
-	instructionTelem := jcode.NewEncoder(os.Stdout)
+	comms := jcode.NewRobotCommunicator(os.Stdout, os.Stdin)
+	comms.Start()
 
 	// Init window
 	cfg := pixelgl.WindowConfig{
@@ -91,7 +91,8 @@ func run() {
 		win.Clear(colornames.Black)
 
 		// Update target state
-		if !tsm.Update(instructions, instructionTelem) {
+		if err := tsm.Update(comms); err != nil {
+			fmt.Println(err)
 			return
 		}
 		tspWpPos := tsm.TargetPosition()
