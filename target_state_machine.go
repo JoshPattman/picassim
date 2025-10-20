@@ -55,12 +55,18 @@ func (sm *TargetStateMachine) Update(comms *jcode.RobotCommunicator) error {
 		sm.NextDuration = 0
 
 	}
-	for needNextInstruction && len(comms.FromController()) > 0 {
+	for needNextInstruction {
 		var ins jcode.Instruction
+		noMoreInstructions := false
 		select {
 		case ins = <-comms.FromController():
 		case err := <-comms.Error():
 			return err
+		default:
+			noMoreInstructions = false
+		}
+		if noMoreInstructions {
+			break
 		}
 		sm.HasActiveInstruction = true
 		switch ins := ins.(type) {
