@@ -63,7 +63,7 @@ func (sm *TargetStateMachine) Update(comms *jcode.RobotCommunicator) error {
 		case err := <-comms.Error():
 			return err
 		default:
-			noMoreInstructions = false
+			noMoreInstructions = true
 		}
 		if noMoreInstructions {
 			break
