@@ -1,4 +1,4 @@
-# `picassim` - A Drawing Robot Simulator
+# Picasso Simulator - A Drawing Robot Simulator
 ![sim](readme_assets/sim.jpg)
 
 - Picassim is a simulator designed to be a drop in replacement for a painting/drawing robot that runs [jcode](https://github.com/JoshPattman/jcode).
