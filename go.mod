@@ -1,7 +1,7 @@
 module github.com/JoshPattman/picassim
 
 require (
-	github.com/JoshPattman/jcode v0.0.1
+	github.com/JoshPattman/jcode v0.2.0
 	github.com/gopxl/pixel v1.0.0
 	golang.org/x/image v0.13.0
 )
